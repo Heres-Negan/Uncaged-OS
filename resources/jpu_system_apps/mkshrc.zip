@@ -1,0 +1,85 @@
+# Copyright (c) 2021
+#	Negan @werenegan
+#
+#
+# Pimped /system/etc/mkshrc for Android
+
+VARS() {
+#UNPRIVILEGED USER PROPS
+NAME=user    #Edit These change your unprivileged shell prompt. The Values entered here CAN NOT HAVE a Preceding $
+HOST=Uncaged	#The example config would show something like Negan@JP5S: /sdcard $
+
+NAME_COLOR=$GREEN     # These Variables can be Edited to customize the color scheme of the prompt the colors here
+SYMBOL_COLOR=$GREEN	# DO REQUIRE a preceding $ ( because they are shell variables) the choices are as follows
+HOST_COLOR=$GREEN	# $RED $BLUE $GREEN $ORANGE $PURPLE $CYAN $WHITE
+DIR_COLOR=$GREEN
+PROMPT_COLOR=$GREEN
+INPUT_COLOR=$WHITE
+
+
+
+#ROOT USER PROPS
+U0_NAME='[R00T]'   # These Variables can be edited just as the ones above but will only be in effect when you
+U0_HOST=Uncaged		# are logged in as root (using the su command)
+				#when you are finished editing you need you save this file as /system/etc/mkshrc
+U0_NAME_COLOR=$PURPLE		#this is a system file so it is always a good idea to make a backup of the original
+U0_SYMBOL_COLOR=$PURPLE		#and interestingly enough this script does not need to be chmodded in order for the
+U0_HOST_COLOR=$PURPLE		# system to execute it when your shell starts.
+U0_DIR_COLOR=$PURPLE
+U0_PROMPT_COLOR=$PURPLE
+U0_INPUT_COLOR=$WHITE
+
+
+
+
+
+}
+
+MAIN() {
+if (( USER_ID ))
+ then PS1='$'
+VARS
+else PS1='#'
+NAME=$U0_NAME
+HOST=$U0_HOST
+
+NAME_COLOR=$U0_NAME_COLOR
+SYMBOL_COLOR=$UO_SYMBOL_COLOR
+HOST_COLOR=$U0_HOST_COLOR
+DIR_COLOR=$U0_DIR_COLOR
+PROMPT_COLOR=$U0_PROMPT_COLOR
+INPUT_COLOR=$U0_INPUT_COLOR
+fi
+
+function ERR_CODE {
+        typeset e=$?
+
+        (( e )) && print -n "$e|"
+}
+PS1='$(ERR_CODE)$(echo $NAME_COLOR)$NAME$(echo $SYMBOL_COLOR)@$(echo $HOST_COLOR)$HOST:$(echo $DIR_COLOR)${PWD:-?} '$(echo $PROMPT_COLOR)"$PS1"$(echo $INPUT_COLOR)
+
+export HOME HOSTNAME MKSH PS1 SHELL TERM USER
+
+alias ls='busybox ls --color=auto'
+alias remount='mount -o remount,rw /system && mount -o remount,rw /'
+alias grep='grep --color=auto'
+alias find='busybox find'
+alias umount='busybox umount'
+alias cp='busybox cp'
+for p in ~/.bin; do
+	[[ -d $p/. ]] || continue
+	[[ :$PATH: = *:$p:* ]] || PATH=$p:$PATH
+done
+
+unset p
+}
+
+
+
+: ${TERM:=vt100} ${HOME:=/data} ${MKSH:=/system/bin/sh} ${HOSTNAME:=android}
+: ${SHELL:=$MKSH} ${USER:=$(typeset x=$(id); x=${x#*\(}; print -r -- ${x%%\)*})}
+: ${RED:='\e[1;31m'} ${GREEN:='\e[1;32m'} ${BLUE:='\e[1;34m'} ${ORANGE:='\e[1;33m'}
+: ${PURPLE:='\e[1;35m'} ${CYAN:='\e[1;36m'} ${WHITE:='\e[1;37m'}
+export HOME HOSTNAME MKSH PS1 SHELL TERM USER RED GREEN BLUE ORANGE PURPLE CYAN WHITE
+VARS
+MAIN
